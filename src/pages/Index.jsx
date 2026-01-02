@@ -12,7 +12,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
 import ScrollWorksSection from "@/components/ui/ScrollWorksSection";
-import ball from "@/assets/ball.svg";
+import HeroAnimatedBackground from "../components/HeroAnimatedBackground";
 
 const services = [
   {
@@ -127,29 +127,10 @@ const itemVariants = {
 const Index = () => {
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="relative min-h-screen overflow-hidden bg-background">
-        {/* SVG BACKGROUND */}
-        <div className="absolute inset-0 pointer-events-none">
-          <img
-            src={ball}
-            alt="ball background"
-            className="
-  absolute
-  left-1/2
-  top-1/2
-  -translate-x-1/2
-  -translate-y-[25%]
-  w-[70%]
-  max-w-[800px]
-  opacity-80
-  blur-[1px]
-  pointer-events-none
-  z-0
-"
-          />
-        </div>
-
+      <section className="relative h-screen w-full overflow-hidden bg-white">
+        {/* HERO BACKGROUND */}
+        <HeroAnimatedBackground/>
+        
         {/* GRADIENT OVERLAY */}
         <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/60 to-background z-10" />
 

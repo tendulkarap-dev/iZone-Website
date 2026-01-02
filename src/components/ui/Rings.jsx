@@ -8,25 +8,21 @@ const CursorRings = () => {
     { x: 0, y: 0 }, // inner/tail ring
   ]);
 
-  // SPEED CONTROL: tuned to be less sticky, more tail-like
-  const speeds = [0.02, 0.010]; // outer and inner ring speeds
+  // SPEED CONTROL
+  const speeds = [0.03, 0.02]; // outer and inner ring speeds
 
   // SPACING CONTROL
   const spacing = 160;
 
   const ringSizes = [30, 6];
+
   const cursor = useRef({
     x: window.innerWidth / 2,
     y: window.innerHeight / 2,
   });
-  const isMoving = useRef(false);
-  let idleTimeout = useRef();
 
-  // Desktop-only detection (mouse / trackpad)
-  const isDesktop = useRef(
-    typeof window !== "undefined" &&
-      window.matchMedia("(pointer: fine)").matches
-  );
+  const isMoving = useRef(false);
+  const idleTimeout = useRef();
 
   const colorPalette = [
     "rgba(255, 94, 0, 0.7)",
@@ -36,29 +32,29 @@ const CursorRings = () => {
     "rgba(255, 215, 0, 0.7)",
     "rgba(138, 43, 226, 0.7)",
   ];
+
   const colorChangeInterval = 6000;
 
   // Automatic color change
   useEffect(() => {
     let colorIndex = 0;
+
     const changeColors = () => {
       colorIndex = (colorIndex + 1) % colorPalette.length;
       ringRefs.current.forEach((ring, i) => {
-        if (ring) {
-          const alpha = i === 0 ? 0.7 : 0.4;
-          const color = colorPalette[colorIndex].replace(/0\.7/, alpha);
-          ring.style.borderColor = color;
-        }
+        if (!ring) return;
+        const alpha = i === 0 ? 0.7 : 0.4;
+        const color = colorPalette[colorIndex].replace(/0\.7/, alpha);
+        ring.style.borderColor = color;
       });
     };
-    const colorTimer = setInterval(changeColors, colorChangeInterval);
-    return () => clearInterval(colorTimer);
+
+    const timer = setInterval(changeColors, colorChangeInterval);
+    return () => clearInterval(timer);
   }, []);
 
-  // Mouse movement and animation (DESKTOP ONLY)
+  // Mouse movement + animation (desktop by behavior)
   useEffect(() => {
-    if (!isDesktop.current) return;
-
     const handleMouseMove = (e) => {
       cursor.current.x = e.clientX;
       cursor.current.y = e.clientY;
@@ -71,14 +67,13 @@ const CursorRings = () => {
     };
 
     const animate = () => {
-
-      // Outer ring trailing behavior (like inner ring)
+      // Outer ring follows cursor
       const dx0 = cursor.current.x - positions.current[0].x;
       const dy0 = cursor.current.y - positions.current[0].y;
       positions.current[0].x += dx0 * speeds[0];
       positions.current[0].y += dy0 * speeds[0];
 
-      // Inner ring trails the outer ring with spacing
+      // Inner ring trails outer ring
       const dx = positions.current[0].x - positions.current[1].x;
       const dy = positions.current[0].y - positions.current[1].y;
       const distance = Math.sqrt(dx * dx + dy * dy);
@@ -102,11 +97,12 @@ const CursorRings = () => {
           (cursor.current.y - positions.current[1].y) * speeds[1];
       }
 
-      // Center both rings on cursor when idle
+      // Slower return when cursor stops
       if (!isMoving.current) {
-        positions.current.forEach((pos) => {
-          pos.x += (cursor.current.x - pos.x) * 0.8;
-          pos.y += (cursor.current.y - pos.y) * 0.8;
+        positions.current.forEach((pos, i) => {
+          const returnSpeed = speeds[i] * 0.6;
+          pos.x += (cursor.current.x - pos.x) * returnSpeed;
+          pos.y += (cursor.current.y - pos.y) * returnSpeed;
         });
       }
 
